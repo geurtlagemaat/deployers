@@ -77,6 +77,13 @@ while getopts ":n" opt; do
       sudo apt-get --force-yes --yes install libsqlite3-dev
     fi
 
+    PKG_LIBFFI_DEV=$(dpkg-query -W --showformat='${Status}\n' libffi-dev|grep "install ok installed")
+    echo Checking for libffi-dev: $PKG_LIBFFI_DEV
+    if [ "" == "$PKG_LIBFFI_DEV" ]; then
+      echo "No libffi-dev. Setting up libffi-dev."
+      sudo apt-get --force-yes --yes install libffi-dev
+    fi
+
     PKG_APT_LISTCHANGES=$(dpkg-query -W --showformat='${Status}\n' apt-listchanges|grep "install ok installed")
     echo Checking for apt-listchanges: $PKG_APT_LISTCHANGES
     if [ "install ok installed" == "$PKG_APT_LISTCHANGES" ]; then
@@ -174,6 +181,14 @@ if [ "" == "$SQLITE3-DEV" ]; then
   echo "No libsqlite3-dev. Setting up libsqlite3-dev."
   sudo apt-get --force-yes --yes install libsqlite3-dev
 fi
+
+PKG_LIBFFI_DEV=$(dpkg-query -W --showformat='${Status}\n' libffi-dev|grep "install ok installed")
+echo Checking for libffi-dev: $PKG_LIBFFI_DEV
+if [ "" == "$PKG_LIBFFI_DEV" ]; then
+  echo "No libffi-dev. Setting up libffi-dev."
+  sudo apt-get --force-yes --yes install libffi-dev
+fi
+
 PKG_APT_LISTCHANGES=$(dpkg-query -W --showformat='${Status}\n' apt-listchanges|grep "install ok installed")
 echo Checking for apt-listchanges: $PKG_APT_LISTCHANGES
 if [ "install ok installed" == "$PKG_APT_LISTCHANGES" ]; then
