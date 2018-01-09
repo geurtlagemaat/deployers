@@ -1,0 +1,14 @@
+[Unit]
+Description=Circus process manager
+After=syslog.target network.target nss-lookup.target
+
+[Service]
+Type=simple
+ExecReload=/opt/bliknet/circus/virtualenv/bin/circusctl --endpoint tcp://localhost:5555 reload
+ExecStart=/opt/bliknet/circus/virtualenv/bin/circusd /opt/bliknet/circus/config/circus.ini
+User=bliknet
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

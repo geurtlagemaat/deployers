@@ -12,14 +12,33 @@ from contextlib import closing
 from fabric.api import run, cd, sudo, env
 from fabric.decorators import task
 
-BLIKNET_BASE_DIR = '/opt/bliknet'
+@task
+def update_upgrade():
+    """ Update OS """
+    sudo("apt-get update")
+    sudo("apt-get upgrade -y")
+
+def create_venv(location, name, user):
+    with cd(location):
+        sudo("virtualenv -p python %s" % name, user=user)
+
+def forcedir(location, dirname, user, group):
+    # TODO check ownership
+    if os.path.isdir(location):
+        if os.path.isdir(os.path.join(location,dirname)):
+            print "given base location %s has already a %s folder." % (location,dirname)
+        else:
+            with cd("location"):
+                sudo("mkdir %s" % dirname)
+                sudo("chown %s:%s %s" % (user, group, dirname))
+    else:
+        print "given base location %s does not exists" % location
 
 def generate_password(length=8):
     """Generate a random password with the given length"""
     chars = string.ascii_letters + string.digits
     random.seed = (os.urandom(1024))
     return ''.join(random.choice(chars) for _ in range(length))
-
 
 def collect_requirements(requirements_path, repository_path, target_path):
     """Copy requirement packages, also creating a list of filenames of packages that should be installed."""
@@ -33,7 +52,6 @@ def collect_requirements(requirements_path, repository_path, target_path):
 
     filter_requirements(requirements_path, os.path.join(target_path, 'filtered-requirements.txt'))
 
-
 def install_virtualenv_contents_setup(venv_path, package_repository_path, package_list_path):
     """Install or upgrade requirements into an existing virtualenv using setup.py"""
     # Create temporary working directory
@@ -41,7 +59,7 @@ def install_virtualenv_contents_setup(venv_path, package_repository_path, packag
 
     # Read contents of file with package names
     reqs_file_contents = run('cat "{package_list_path}"'.format(**locals()))
-    
+
     for fn in reqs_file_contents.split('\n'):
         fn = fn.strip()
         if fn == '':
@@ -58,19 +76,17 @@ def install_virtualenv_contents_setup(venv_path, package_repository_path, packag
             log_name = posixjoin(work_dir, package_name + '.log')
             sudo('{venv_path}/bin/python setup.py install > {log_name} 2>&1'.format(**locals()))
 
-
 def install_virtualenv_contents_pip(venv_path, package_repository_path, requirements_path):
     """Install or upgrade requirements into an existing virtualenv using PIP"""
     sudo(('{venv_path}/bin/pip install -r {requirements_path} --no-index '
           '--find-links {package_repository_path}').format(**locals()))
-
 
 def get_dependency_filenames(requirements_path, package_repository_path):
     """Return a list of Python packages file names to install for the given instance"""
     res = []
 
     package_map = get_package_map(package_repository_path)
-    
+
     for line in open(requirements_path):
         package, version = parse_requirement(line)
 
@@ -89,7 +105,6 @@ def get_dependency_filenames(requirements_path, package_repository_path):
 
     return res
 
-
 def filter_requirements(requirements_path, filtered_requirements_path):
     with open(filtered_requirements_path, 'w') as filtered_file:
         for line in open(requirements_path):
@@ -103,7 +118,6 @@ def filter_requirements(requirements_path, filtered_requirements_path):
 def remove_comments(line):
     """Remove comments, meaning everything after the first #"""
     return line.split('#', 1)[0].strip()
-
 
 def parse_requirement(line):
     """Return a tuple of a package name and version number for the given requirements line
@@ -120,10 +134,8 @@ def parse_requirement(line):
     else:
         return package.strip().lower(), version.strip().lower()
 
-
 class UnknownExtensionException(Exception):
     pass
-
 
 PACKAGE_EXTRACT_COMMANDS = {
     '.tar.gz': 'tar xfz "%s"',
@@ -131,7 +143,6 @@ PACKAGE_EXTRACT_COMMANDS = {
     '.tar.bz2': 'tar xfj "%s"',
     '.zip': 'unzip -q "%s"',
 }
-
 
 def remove_package_extension(fn):
     """Remove extension from given package filename"""
@@ -141,7 +152,6 @@ def remove_package_extension(fn):
 
     raise UnknownExtensionException('Package file %s has unknown extension' % fn)
 
-
 def get_extract_command(fn):
     """Return the command needed to unpack the given file"""
     for ext, cmd in PACKAGE_EXTRACT_COMMANDS.iteritems():
@@ -150,11 +160,10 @@ def get_extract_command(fn):
 
     raise UnknownExtensionException("Don't know how to unpack file %s" % fn)
 
-
 def get_package_map(package_repository_path):
     """Return a dict that maps package names to package filename paths
 
-    Each key is the lowercase package name without the extension, e.g. 
+    Each key is the lowercase package name without the extension, e.g.
     twisted-16.3.0"""
     repository_files = os.listdir(package_repository_path)
 
@@ -170,16 +179,14 @@ def get_package_map(package_repository_path):
 
     return res
 
-
 def add_dir_to_zip(zip_file_path, path_to_add, prefix=None,
                    ext_blacklist=None, ext_whitelist=None):
-
     """Add all files below path_to_add to a zipfile at zip_file_path
 
     Note that the archive is appended to, so if you want to start with an empty
     archive, remove the file first.
 
-    If prefix is supplied, all file paths in the file are prefixed with that 
+    If prefix is supplied, all file paths in the file are prefixed with that
     string.
 
     Files having an extension in ext_blacklist are not added to the archive.
@@ -202,37 +209,6 @@ def add_dir_to_zip(zip_file_path, path_to_add, prefix=None,
                 if prefix is not None:
                     arcname = prefix + arcname
                 zipFile.write(filePath, arcname)
-
-
-@task
-def create_bliknet_user():
-    """Create user bliknet and group bliknet on remote server"""
-    group_exists = False
-    user_exists = False
-
-    group_list = run('getent group')
-    user_list = run('getent passwd')
-
-    for line in group_list.split('\n'):
-        if line.startswith('bliknet:'):
-            group_exists = True
-            break
-    for line in user_list.split('\n'):
-        if line.startswith('bliknet:'):
-            user_exists = True
-            break
-
-    if not group_exists:
-        sudo('groupadd --system bliknet')
-    else:
-        print('Not creating group bliknet: it already exists')
-    if not user_exists:
-        sudo('useradd --create-home --home-dir /opt/bliknet --gid bliknet --system bliknet')
-        # TODO, test!
-        sudo(
-            'for GROUP in adm dialout cdrom sudo audio video plugdev games users netdev input spi i2c gpio; do sudo adduser bliknet $GROUP; done')
-    else:
-        print('Not creating user bliknet: it already exists')
 
 class sudosu:
     """Run commands as other user using "sudo su - <username>" """
