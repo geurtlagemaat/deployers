@@ -98,12 +98,6 @@ while getopts ":n" opt; do
 	sudo pip install packaging
 	sudo pip install appdirs
 	sudo pip install six
-	# sudo pip install paho-mqtt
-	# sudo pip install twisted==16.4.1
-	# sudo pip install circus
-	# sudo pip install wiringpi2
-	# sudo pip install astral
-	# sudo pip install ConcurrentLogHandler
 	sudo pip install fabric
     
     exit
@@ -203,12 +197,12 @@ sudo pip install cryptography
 sudo pip install packaging
 sudo pip install appdirs
 sudo pip install six
-# sudo pip install paho-mqtt
-# sudo pip install twisted==16.4.1
-# sudo pip install circus
-# sudo pip install astral
-# sudo pip install wiringpi2
-# sudo pip install ConcurrentLogHandler
 sudo pip install fabric
+
+mkdir tmp
+cd tmp
+git clone --branch master https://github.com/geurtlagemaat/deployers.git
+cd deployers
+fab create_bliknet_environment
 
 exit
