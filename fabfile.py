@@ -109,9 +109,9 @@ def install_Circus_Process_Manager():
     with cd(CIRCUS_VIRTUAL_ENV_LOCATION):
         sudo("source %s/bin/activate && pip install circus" % CIRCUS_VIRTUAL_ENV_LOCATION, user="bliknet")
     # Enable auto start using systemd
-    sudo('cp scripts/circus.service /etc/systemd/system/circus.service'.format(**env))
-    sudo('chmod 644 /etc/systemd/system/circus.service')
-    sudo('systemctl --system daemon-reload')
+    sudo('sudo cp scripts/circus.service /etc/systemd/system/circus.service'.format(**env))
+    sudo('sudo chmod 644 /etc/systemd/system/circus.service')
+    sudo('sudo systemctl --system daemon-reload')
 
 @task
 def create_bliknet_environment():
