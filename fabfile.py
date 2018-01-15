@@ -6,17 +6,12 @@ Fabfile to create Generic Bliknet Environment
 - create a virtualenv for Circus
 - install Circus Process Manager
 
-Depends targets.py
 """
 ########################################
 
-import sys
 from fabric.api import *
-import fabric.contrib.files
 import time
 import os
-# from os.path import join
-# from posixpath import join as posixjoin
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
