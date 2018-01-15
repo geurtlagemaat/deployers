@@ -28,7 +28,7 @@ def forcedir(location, dirname, user, group):
         if os.path.isdir(os.path.join(location,dirname)):
             print "given base location %s has already a %s folder." % (location,dirname)
         else:
-            with cd("location"):
+            with cd(location):
                 sudo("mkdir %s" % dirname)
                 sudo("chown %s:%s %s" % (user, group, dirname))
     else:

@@ -98,6 +98,7 @@ def install_pycore():
     sudo("pip install --upgrade pip")
     sudo("pip install virtualenv")
 
+@task
 def install_Circus_Process_Manager():
     # config
     common.forcedir(location=BLIKNET_BASE_DIR, dirname='circus', user=DEFAULT_USER, group=DEFAULT_GROUP)
