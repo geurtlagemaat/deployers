@@ -15,19 +15,21 @@ from fabric.api import *
 import fabric.contrib.files
 import time
 import os
-from os.path import join
-from posixpath import join as posixjoin
+# from os.path import join
+# from posixpath import join as posixjoin
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
 import common  # noqa
 
 BLIKNET_BASE_DIR = '/opt/bliknet'
-CIRCUS_BASE_DIR = os.join('/opt/bliknet', 'circus')
+CIRCUS_BASE_DIR = os.path.join(BLIKNET_BASE_DIR, 'circus')
 CIRCUS_VIRTUAL_ENV_NAME = 'virtualenv'
-CIRCUS_VIRTUAL_ENV_LOCATION = os.join(CIRCUS_BASE_DIR, CIRCUS_VIRTUAL_ENV_NAME)
+CIRCUS_VIRTUAL_ENV_LOCATION = os.path.join(CIRCUS_BASE_DIR, CIRCUS_VIRTUAL_ENV_NAME)
 DEFAULT_USER = 'bliknet'
 DEFAULT_GROUP = 'bliknet'
+
+env.hosts = ['localhost']
 
 #######################
 ## Core server setup ##
@@ -36,7 +38,7 @@ DEFAULT_GROUP = 'bliknet'
 def install_start():
     """ Notify of install start """
     print("* Warning *")
-    print("""The primary use of this installer is to prepare a Bliknet enviroment for a new Bliknet Node""")
+    print("""The primary use of this installer is to prepare a Bliknet environment for a new Bliknet Node""")
     time.sleep(10)
     print("Installer is starting...")
     print("OS will reboot when the installer is complete.")
