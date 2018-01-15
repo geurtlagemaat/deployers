@@ -108,7 +108,7 @@ def install_Circus_Process_Manager():
     # install Circus
     with cd(CIRCUS_VIRTUAL_ENV_LOCATION):
         sudo("source %s/bin/activate && pip install circus" % CIRCUS_VIRTUAL_ENV_LOCATION, user="bliknet")
-    sudo('cp %s %s' % (os.path.join(SCRIPT_DIR, 'circus-config/circus.ini')), os.path.join(CIRCUS_BASE_DIR, 'config'))
+    sudo('cp %s %s' % (os.path.join(SCRIPT_DIR, 'circus-config/circus.ini'), os.path.join(CIRCUS_BASE_DIR, 'config')))
     # Enable auto start using systemd
     sudo('sudo cp %s /etc/systemd/system/circus.service'.format(**env) % os.path.join(SCRIPT_DIR, 'scripts/circus.service'))
     sudo('sudo chmod 644 /etc/systemd/system/circus.service')
