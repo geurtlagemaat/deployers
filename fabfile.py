@@ -1,11 +1,21 @@
 ########################################
 """
 Fabfile to create Generic Bliknet Environment
-- create user
+- create user. Set passwrd with:
+    sudo su -
+    passwd bliknet
 - create base structure
 - create a virtualenv for Circus
 - install Circus Process Manager
 
+And Bliknet specific Apps
+Each Bliknet app has it's own VirtualEnv environment
+
+# CANDO
+conditional requirements
+Install SMAData app
+Mount NAS
+Copy settings etc from NAS
 """
 ########################################
 
@@ -15,16 +25,24 @@ import os
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
-import common  # noqa
-
-BLIKNET_BASE_DIR = '/opt/bliknet'
-CIRCUS_BASE_DIR = os.path.join(BLIKNET_BASE_DIR, 'circus')
-CIRCUS_VIRTUAL_ENV_NAME = 'virtualenv'
-CIRCUS_VIRTUAL_ENV_LOCATION = os.path.join(CIRCUS_BASE_DIR, CIRCUS_VIRTUAL_ENV_NAME)
-DEFAULT_USER = 'bliknet'
-DEFAULT_GROUP = 'bliknet'
+import common
 
 env.hosts = ['localhost']
+
+DEFAULT_USER = 'bliknet'
+DEFAULT_GROUP = 'bliknet'
+VIRTUAL_ENV_NAME = 'virtualenv'
+BLIKNET_BASE_DIR = '/opt/bliknet'
+
+CIRCUS_BASE_DIR = os.path.join(BLIKNET_BASE_DIR, 'circus')
+CIRCUS_VIRTUAL_ENV_LOCATION = os.path.join(CIRCUS_BASE_DIR, VIRTUAL_ENV_NAME)
+CIRCUS_APPS_CONFIGS = os.path.join(CIRCUS_BASE_DIR,'config','apps')
+
+# Apps and there names name must equal git repos name!
+LIVING_APP_DIR = 'living'
+RGBCONTROLLER_APP_DIR = 'RGBController'
+ENERGYLOGGER_APP_DIR = 'pilogger'
+WEATHERLOGGER_APP_DIR = 'weatherstation'
 
 #######################
 ## Core server setup ##
@@ -36,7 +54,7 @@ def install_start():
     print("""The primary use of this installer is to prepare a Bliknet environment for a new Bliknet Node""")
     time.sleep(10)
     print("Installer is starting...")
-    print("OS will reboot when the installer is complete.")
+    # print("OS will reboot when the installer is complete.")
     time.sleep(5)
 
 @task
@@ -95,16 +113,19 @@ def install_pycore():
 
 @task
 def install_Circus_Process_Manager():
-    # config
+    """Install Circus using a virtual env. Create directure structure for future Bliknet App Configs
+       Install as a systemd service.
+    """
     common.forcedir(location=BLIKNET_BASE_DIR, dirname='circus', user=DEFAULT_USER, group=DEFAULT_GROUP)
-    common.create_venv(location=CIRCUS_BASE_DIR, name=CIRCUS_VIRTUAL_ENV_NAME, user=DEFAULT_USER)
+    common.create_venv(location=CIRCUS_BASE_DIR, name=VIRTUAL_ENV_NAME, user=DEFAULT_USER)
     common.forcedir(location=CIRCUS_BASE_DIR, dirname='config', user=DEFAULT_USER, group=DEFAULT_GROUP)
-    # TODO copy generic circus.ini
-    # install Circus
+    # create the location for the Apps configs to be installed later
+    common.forcedir(location=os.path.join(CIRCUS_BASE_DIR,'config'), dirname='apps', user=DEFAULT_USER, group=DEFAULT_GROUP)
+
     with cd(CIRCUS_VIRTUAL_ENV_LOCATION):
         sudo("source %s/bin/activate && pip install circus" % CIRCUS_VIRTUAL_ENV_LOCATION, user="bliknet")
     sudo('cp %s %s' % (os.path.join(SCRIPT_DIR, 'circus-config/circus.ini'), os.path.join(CIRCUS_BASE_DIR, 'config')))
-    # Enable auto start using systemd
+
     sudo('sudo cp %s /etc/systemd/system/circus.service'.format(**env) % os.path.join(SCRIPT_DIR, 'scripts/circus.service'))
     sudo('sudo chmod 644 /etc/systemd/system/circus.service')
     sudo('sudo systemctl --system daemon-reload')
@@ -118,4 +139,59 @@ def create_bliknet_environment():
     create_bliknet_user()
     create_root_dirs()
     install_Circus_Process_Manager()
+
+@task
+def install_bliknet_lib(virtualenvPath):
+    with cd('/tmp'):
+        sudo("git clone --branch master https://github.com/geurtlagemaat/bliknetlib.git", user="bliknet")
+        with cd('/bliknetlib'):
+            sudo("source %s/bin/activate && python setup.py install" % virtualenvPath, user="bliknet")
+
+@task
+def install_generic_bliknet_app(appdir, basedir, gitURL):
+    print("* Warning *")
+    print("""This installer will install Bliknet %s App""" % appdir)
+    time.sleep(5)
+    print("Installer is starting...")
+    common.forcedir(location=BLIKNET_BASE_DIR, dirname=appdir, user=DEFAULT_USER, group=DEFAULT_GROUP)
+    common.create_venv(location=os.path.join(BLIKNET_BASE_DIR, appdir), name=VIRTUAL_ENV_NAME, user=DEFAULT_USER)
+    install_bliknet_lib(virtualenvPath=os.path.join(BLIKNET_BASE_DIR, appdir, VIRTUAL_ENV_NAME))
+    with cd('/tmp'):
+        sudo("git clone --branch master %s" % gitURL, user=DEFAULT_USER)
+        with cd('/%s' % appdir):
+            sudo("cp . %s" % os.path.join(basedir, 'app'), user=DEFAULT_USER)
+            sudo("cp circus/* %s" % CIRCUS_APPS_CONFIGS, user=DEFAULT_USER)
+    # TODO: Mount NAS, Copy settings file
+
+@task
+def install_bliknet_living_app():
+    print("* Warning *")
+    print("""This installer will install Bliknet %s App""" % LIVING_APP_DIR)
+    time.sleep(5)
+    print("Installer is starting...")
+    install_generic_bliknet_app(LIVING_APP_DIR)
+
+@task
+def install_bliknet_energylogger_app():
+    print("* Warning *")
+    print("""This installer will install Bliknet %s App""" % ENERGYLOGGER_APP_DIR)
+    time.sleep(5)
+    print("Installer is starting...")
+    install_generic_bliknet_app(ENERGYLOGGER_APP_DIR)
+
+@task
+def install_bliknet_RGBController_app():
+    print("* Warning *")
+    print("""This installer will install Bliknet %s App""" % RGBCONTROLLER_APP_DIR)
+    time.sleep(5)
+    print("Installer is starting...")
+    install_generic_bliknet_app(RGBCONTROLLER_APP_DIR)
+
+@task
+def install_bliknet_weatherlogger_app():
+    print("* Warning *")
+    print("""This installer will install Bliknet %s App""" % WEATHERLOGGER_APP_DIR)
+    time.sleep(5)
+    print("Installer is starting...")
+    install_generic_bliknet_app(WEATHERLOGGER_APP_DIR)
 
