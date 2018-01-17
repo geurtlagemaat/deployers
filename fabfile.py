@@ -141,7 +141,6 @@ def create_bliknet_environment():
     create_root_dirs()
     install_Circus_Process_Manager()
 
-@task
 def install_bliknet_lib(virtualenvPath):
     with cd('/tmp'):
         sudo("git clone --branch master https://github.com/geurtlagemaat/bliknetlib.git", user="bliknet")
@@ -161,43 +160,27 @@ def install_generic_bliknet_app(appdir):
     gitURL = GIT_BASE_URL + appdir + '.git'
     with cd('/tmp'):
         sudo("git clone --branch master %s" % gitURL, user=DEFAULT_USER)
-        with cd('%s' % appdir):
+        # with cd('%s' % appdir):
             # mv pilogger/ /opt/bliknet/pilogger/app
             # sudo("cp * %s" % os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), user=DEFAULT_USER)
-            sudo("mv %s/ %s " % (appdir, os.path.join(BLIKNET_BASE_DIR, appdir, 'app')), user=DEFAULT_USER)
-            # sudo("cp circus/* %s" % CIRCUS_APPS_CONFIGS, user=DEFAULT_USER)
-            sudo("mv %s/circus/*.ini %s" % (os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), CIRCUS_APPS_CONFIGS), user=DEFAULT_USER)
+        sudo("mv %s/ %s " % (appdir, os.path.join(BLIKNET_BASE_DIR, appdir, 'app')), user=DEFAULT_USER)
+        # sudo("cp circus/* %s" % CIRCUS_APPS_CONFIGS, user=DEFAULT_USER)
+        sudo("mv %s/circus/*.ini %s" % (os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), CIRCUS_APPS_CONFIGS), user=DEFAULT_USER)
     # TODO: Mount NAS, Copy settings file
 
 @task
 def install_bliknet_living_app():
-    print("* Warning *")
-    print("""This installer will install Bliknet %s App""" % LIVING_APP_DIR)
-    time.sleep(5)
-    print("Installer is starting...")
     install_generic_bliknet_app(LIVING_APP_DIR)
 
 @task
 def install_bliknet_energylogger_app():
-    print("* Warning *")
-    print("""This installer will install Bliknet %s App""" % ENERGYLOGGER_APP_DIR)
-    time.sleep(5)
-    print("Installer is starting...")
     install_generic_bliknet_app(ENERGYLOGGER_APP_DIR)
 
 @task
 def install_bliknet_RGBController_app():
-    print("* Warning *")
-    print("""This installer will install Bliknet %s App""" % RGBCONTROLLER_APP_DIR)
-    time.sleep(5)
-    print("Installer is starting...")
     install_generic_bliknet_app(RGBCONTROLLER_APP_DIR)
 
 @task
 def install_bliknet_weatherlogger_app():
-    print("* Warning *")
-    print("""This installer will install Bliknet %s App""" % WEATHERLOGGER_APP_DIR)
-    time.sleep(5)
-    print("Installer is starting...")
     install_generic_bliknet_app(WEATHERLOGGER_APP_DIR)
 
