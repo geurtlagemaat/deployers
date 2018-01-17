@@ -145,7 +145,7 @@ def create_bliknet_environment():
 def install_bliknet_lib(virtualenvPath):
     with cd('/tmp'):
         sudo("git clone --branch master https://github.com/geurtlagemaat/bliknetlib.git", user="bliknet")
-        with cd('/bliknetlib'):
+        with cd('bliknetlib'):
             sudo("source %s/bin/activate && python setup.py install" % virtualenvPath, user="bliknet")
 
 @task
@@ -160,7 +160,7 @@ def install_generic_bliknet_app(appdir):
     gitURL = GIT_BASE_URL + appdir + '.git'
     with cd('/tmp'):
         sudo("git clone --branch master %s" % gitURL, user=DEFAULT_USER)
-        with cd('/%s' % appdir):
+        with cd('%s' % appdir):
             sudo("cp . %s" % os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), user=DEFAULT_USER)
             sudo("cp circus/* %s" % CIRCUS_APPS_CONFIGS, user=DEFAULT_USER)
     # TODO: Mount NAS, Copy settings file
