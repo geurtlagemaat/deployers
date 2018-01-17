@@ -38,6 +38,7 @@ CIRCUS_BASE_DIR = os.path.join(BLIKNET_BASE_DIR, 'circus')
 CIRCUS_VIRTUAL_ENV_LOCATION = os.path.join(CIRCUS_BASE_DIR, VIRTUAL_ENV_NAME)
 CIRCUS_APPS_CONFIGS = os.path.join(CIRCUS_BASE_DIR,'config','apps')
 
+GIT_BASE_URL = 'https://github.com/geurtlagemaat/'
 # Apps and there names name must equal git repos name!
 LIVING_APP_DIR = 'living'
 RGBCONTROLLER_APP_DIR = 'RGBController'
@@ -148,7 +149,7 @@ def install_bliknet_lib(virtualenvPath):
             sudo("source %s/bin/activate && python setup.py install" % virtualenvPath, user="bliknet")
 
 @task
-def install_generic_bliknet_app(appdir, basedir, gitURL):
+def install_generic_bliknet_app(appdir):
     print("* Warning *")
     print("""This installer will install Bliknet %s App""" % appdir)
     time.sleep(5)
@@ -156,10 +157,11 @@ def install_generic_bliknet_app(appdir, basedir, gitURL):
     common.forcedir(location=BLIKNET_BASE_DIR, dirname=appdir, user=DEFAULT_USER, group=DEFAULT_GROUP)
     common.create_venv(location=os.path.join(BLIKNET_BASE_DIR, appdir), name=VIRTUAL_ENV_NAME, user=DEFAULT_USER)
     install_bliknet_lib(virtualenvPath=os.path.join(BLIKNET_BASE_DIR, appdir, VIRTUAL_ENV_NAME))
+    gitURL = GIT_BASE_URL + appdir + '.git'
     with cd('/tmp'):
         sudo("git clone --branch master %s" % gitURL, user=DEFAULT_USER)
         with cd('/%s' % appdir):
-            sudo("cp . %s" % os.path.join(basedir, 'app'), user=DEFAULT_USER)
+            sudo("cp . %s" % os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), user=DEFAULT_USER)
             sudo("cp circus/* %s" % CIRCUS_APPS_CONFIGS, user=DEFAULT_USER)
     # TODO: Mount NAS, Copy settings file
 
