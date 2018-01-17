@@ -146,7 +146,8 @@ def install_bliknet_lib(virtualenvPath):
         sudo("git clone --branch master https://github.com/geurtlagemaat/bliknetlib.git", user="bliknet")
         with cd('bliknetlib'):
             sudo("source %s/bin/activate && python setup.py install" % virtualenvPath, user="bliknet")
-
+    with cd('/tmp'):
+        sudo("rm -rf bliknetlib", user=DEFAULT_USER)
 @task
 def install_generic_bliknet_app(appdir):
     print("* Warning *")
@@ -155,17 +156,13 @@ def install_generic_bliknet_app(appdir):
     print("Installer is starting...")
     common.forcedir(location=BLIKNET_BASE_DIR, dirname=appdir, user=DEFAULT_USER, group=DEFAULT_GROUP)
     common.create_venv(location=os.path.join(BLIKNET_BASE_DIR, appdir), name=VIRTUAL_ENV_NAME, user=DEFAULT_USER)
-    # common.forcedir(location=os.path.join(BLIKNET_BASE_DIR, appdir), dirname='app', user=DEFAULT_USER, group=DEFAULT_GROUP)
     install_bliknet_lib(virtualenvPath=os.path.join(BLIKNET_BASE_DIR, appdir, VIRTUAL_ENV_NAME))
     gitURL = GIT_BASE_URL + appdir + '.git'
     with cd('/tmp'):
         sudo("git clone --branch master %s" % gitURL, user=DEFAULT_USER)
-        # with cd('%s' % appdir):
-            # mv pilogger/ /opt/bliknet/pilogger/app
-            # sudo("cp * %s" % os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), user=DEFAULT_USER)
         sudo("mv %s/ %s " % (appdir, os.path.join(BLIKNET_BASE_DIR, appdir, 'app')), user=DEFAULT_USER)
-        # sudo("cp circus/* %s" % CIRCUS_APPS_CONFIGS, user=DEFAULT_USER)
         sudo("mv %s/circus/*.ini %s" % (os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), CIRCUS_APPS_CONFIGS), user=DEFAULT_USER)
+        sudo("rm -rf %s" % appdir, user=DEFAULT_USER)
     # TODO: Mount NAS, Copy settings file
 
 @task
