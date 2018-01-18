@@ -124,10 +124,14 @@ def install_Circus_Process_Manager():
     common.forcedir(location=os.path.join(CIRCUS_BASE_DIR,'config'), dirname='apps', user=DEFAULT_USER, group=DEFAULT_GROUP)
 
     with cd(CIRCUS_VIRTUAL_ENV_LOCATION):
-        sudo("source %s/bin/activate && pip install circus" % CIRCUS_VIRTUAL_ENV_LOCATION, user="bliknet")
+        sudo("source %s/bin/activate && pip install circus" % CIRCUS_VIRTUAL_ENV_LOCATION, user=DEFAULT_USER)
+        sudo("source %s/bin/activate && pip install circus-web" % CIRCUS_VIRTUAL_ENV_LOCATION, user=DEFAULT_USER)
     sudo('cp %s %s' % (os.path.join(SCRIPT_DIR, 'circus-config/circus.ini'), os.path.join(CIRCUS_BASE_DIR, 'config')))
-
-    sudo('sudo cp %s /etc/systemd/system/circus.service'.format(**env) % os.path.join(SCRIPT_DIR, 'scripts/circus.service'))
+    sudo('cp %s %s' % (os.path.join(SCRIPT_DIR, 'scripts/*.sh') ,CIRCUS_BASE_DIR), user=DEFAULT_USER)
+    sudo('chmod 700 %s/*.sh' % CIRCUS_BASE_DIR)
+    # OS Auto start with systemd
+    sudo('sudo cp %s /etc/systemd/system/circus.service'.format(**env) % os.path.join(SCRIPT_DIR,
+                                                                                      'scripts/circus.service'))
     sudo('sudo chmod 644 /etc/systemd/system/circus.service')
     sudo('sudo systemctl --system daemon-reload')
 
@@ -143,9 +147,10 @@ def create_bliknet_environment():
 
 def install_bliknet_lib(virtualenvPath):
     with cd('/tmp'):
-        sudo("git clone --branch master https://github.com/geurtlagemaat/bliknetlib.git", user="bliknet")
+        sudo("git clone --branch master https://github.com/geurtlagemaat/bliknetlib.git", user=DEFAULT_USER)
         with cd('bliknetlib'):
-            sudo("source %s/bin/activate && python setup.py install" % virtualenvPath, user="bliknet")
+            sudo("source %s/bin/activate && pip install -r requirements.txt" % virtualenvPath, user=DEFAULT_USER)
+            sudo("source %s/bin/activate && python setup.py install" % virtualenvPath, user=DEFAULT_USER)
     with cd('/tmp'):
         sudo("rm -rf bliknetlib", user=DEFAULT_USER)
 @task
@@ -160,6 +165,9 @@ def install_generic_bliknet_app(appdir):
     gitURL = GIT_BASE_URL + appdir + '.git'
     with cd('/tmp'):
         sudo("git clone --branch master %s" % gitURL, user=DEFAULT_USER)
+        with cd(appdir):
+            sudo("source %s/bin/activate && pip install -r requirements.txt" % os.path.join(BLIKNET_BASE_DIR, appdir, VIRTUAL_ENV_NAME), user=DEFAULT_USER)
+    with cd('/tmp'):
         sudo("mv %s/ %s " % (appdir, os.path.join(BLIKNET_BASE_DIR, appdir, 'app')), user=DEFAULT_USER)
         sudo("mv %s/circus/*.ini %s" % (os.path.join(BLIKNET_BASE_DIR, appdir, 'app'), CIRCUS_APPS_CONFIGS), user=DEFAULT_USER)
         sudo("rm -rf %s" % appdir, user=DEFAULT_USER)
