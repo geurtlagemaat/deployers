@@ -12,7 +12,6 @@ And Bliknet specific Apps
 Each Bliknet app has it's own VirtualEnv environment
 
 # CANDO
-conditional requirements
 Install SMAData app
 Mount NAS
 Copy settings etc from NAS
@@ -44,6 +43,11 @@ LIVING_APP_DIR = 'living'
 RGBCONTROLLER_APP_DIR = 'RGBController'
 ENERGYLOGGER_APP_DIR = 'pilogger'
 WEATHERLOGGER_APP_DIR = 'weatherstation'
+SAUNACONTROL_APP_DIR = 'saunacontroller'
+# TODO: streamer
+# TODO: netchecker
+# TODO: cam2video
+
 
 #######################
 ## Core server setup ##
@@ -175,7 +179,13 @@ def install_generic_bliknet_app(appdir):
 
 @task
 def install_bliknet_living_app():
+    # git clone https://github.com/adafruit/Adafruit_Python_DHT
+    # sudo apt-get install python-dev
     install_generic_bliknet_app(LIVING_APP_DIR)
+    with cd('/tmp'):
+        sudo("git clone --branch master %s" % "https://github.com/adafruit/Adafruit_Python_DHT.git", user=DEFAULT_USER)
+        with cd("Adafruit_Python_DHT"):
+            sudo("source %s/bin/activate && python setup.py install" % os.path.join(BLIKNET_BASE_DIR, LIVING_APP_DIR, VIRTUAL_ENV_NAME), user=DEFAULT_USER)
 
 @task
 def install_bliknet_energylogger_app():
