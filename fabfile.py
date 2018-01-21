@@ -44,6 +44,7 @@ RGBCONTROLLER_APP_DIR = 'RGBController'
 ENERGYLOGGER_APP_DIR = 'pilogger'
 WEATHERLOGGER_APP_DIR = 'weatherstation'
 SAUNACONTROL_APP_DIR = 'saunacontroller'
+DOMOTICZ_MQTT_APP_DIR = 'DomoticzMQTTGateway'
 # TODO: streamer
 # TODO: netchecker
 # TODO: cam2video
@@ -179,8 +180,6 @@ def install_generic_bliknet_app(appdir):
 
 @task
 def install_bliknet_living_app():
-    # git clone https://github.com/adafruit/Adafruit_Python_DHT
-    # sudo apt-get install python-dev
     install_generic_bliknet_app(LIVING_APP_DIR)
     with cd('/tmp'):
         sudo("git clone --branch master %s" % "https://github.com/adafruit/Adafruit_Python_DHT.git", user=DEFAULT_USER)
@@ -199,3 +198,6 @@ def install_bliknet_RGBController_app():
 def install_bliknet_weatherlogger_app():
     install_generic_bliknet_app(WEATHERLOGGER_APP_DIR)
 
+@task
+def install_bliknet_domoticz_mqtt_gateway():
+    install_generic_bliknet_app(DOMOTICZ_MQTT_APP_DIR)
