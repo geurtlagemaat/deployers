@@ -44,9 +44,9 @@ RGBCONTROLLER_APP_DIR = 'RGBController'
 ENERGYLOGGER_APP_DIR = 'pilogger'
 WEATHERLOGGER_APP_DIR = 'weatherstation'
 SAUNACONTROL_APP_DIR = 'saunacontroller'
+GARAGE_APP_DIR = 'garage'
 DOMOTICZ_MQTT_APP_DIR = 'DomoticzMQTTGateway'
 # TODO: streamer
-# TODO: netchecker
 # TODO: cam2video
 
 
@@ -87,7 +87,6 @@ def create_bliknet_user():
         print('Not creating group bliknet: it already exists')
     if not user_exists:
         sudo('useradd --create-home --home-dir /opt/bliknet --gid bliknet --system bliknet')
-        # TODO, test!
         sudo(
             'for GROUP in adm dialout cdrom sudo audio video plugdev games users netdev input spi i2c gpio; do sudo adduser bliknet $GROUP; done')
     else:
@@ -143,7 +142,7 @@ def install_Circus_Process_Manager():
 @task
 def create_bliknet_environment():
     install_start()
-    common.update_upgrade()
+    # common.update_upgrade(), done by shell script
     install_syscore()
     install_pycore()
     create_bliknet_user()
@@ -201,3 +200,7 @@ def install_bliknet_weatherlogger_app():
 @task
 def install_bliknet_domoticz_mqtt_gateway():
     install_generic_bliknet_app(DOMOTICZ_MQTT_APP_DIR)
+
+@task
+def install_bliknet_garage_app():
+    install_generic_bliknet_app(GARAGE_APP_DIR)
