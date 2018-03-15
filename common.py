@@ -20,7 +20,7 @@ def update_upgrade():
 
 def create_venv(location, name, user):
     with cd(location):
-        sudo("virtualenv -p python %s" % name, user=user)
+        sudo("virtualenv --system-site-packages -p python %s" % name, user=user)
 
 def forcedir(location, dirname, user, group):
     # TODO check ownership
