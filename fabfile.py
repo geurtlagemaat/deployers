@@ -99,18 +99,18 @@ def create_root_dirs():
 def install_syscore():
     # TODO Check
     """ Download and install Host Dependencies. """
-    sudo("aptitude install -y build-essential")
-    sudo("aptitude install -y python-pip")
-    sudo("aptitude install -y python-dev")
-    sudo("aptitude install -y python-setuptools")
-    sudo("aptitude install -y git")
-    sudo("aptitude install -y libssl-dev")
-    sudo("aptitude install -y cmake")
-    sudo("aptitude install -y libc-ares-dev")
-    sudo("aptitude install -y uuid-dev")
-    sudo("aptitude install -y daemon")
-    sudo("aptitude install -y curl")
-    sudo("aptitude install -y net-tools")
+    sudo("apt install -y build-essential")
+    sudo("apt install -y python-pip")
+    sudo("apt install -y python-dev")
+    sudo("apt install -y python-setuptools")
+    sudo("apt install -y git")
+    sudo("apt install -y libssl-dev")
+    sudo("apt install -y cmake")
+    sudo("apt install -y libc-ares-dev")
+    sudo("apt install -y uuid-dev")
+    sudo("apt install -y daemon")
+    sudo("apt install -y curl")
+    sudo("apt install -y net-tools")
 
 def install_pycore():
     sudo("pip install --upgrade pip")
