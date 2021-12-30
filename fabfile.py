@@ -100,7 +100,7 @@ def install_syscore():
     # TODO Check
     """ Download and install Host Dependencies. """
     sudo("apt install -y build-essential")
-    sudo("apt install -y python-pip")
+    sudo("apt install -y python3-pip")
     sudo("apt install -y python-dev")
     sudo("apt install -y python-setuptools")
     sudo("apt install -y git")
