@@ -197,7 +197,7 @@ sudo pip install cryptography
 sudo pip install packaging
 sudo pip install appdirs
 sudo pip install six
-sudo pip install fabric==1.13.1
+sudo pip install fabric3
 
 mkdir tmp
 cd tmp
