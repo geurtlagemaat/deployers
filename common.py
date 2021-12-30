@@ -26,13 +26,13 @@ def forcedir(location, dirname, user, group):
     # TODO check ownership
     if os.path.isdir(location):
         if os.path.isdir(os.path.join(location,dirname)):
-            print "given base location %s has already a %s folder." % (location,dirname)
+            print("given base location %s has already a %s folder." % (location,dirname))
         else:
             with cd(location):
                 sudo("mkdir %s" % dirname)
                 sudo("chown %s:%s %s" % (user, group, dirname))
     else:
-        print "given base location %s does not exists" % location
+        print("given base location %s does not exists" % location)
 
 def generate_password(length=8):
     """Generate a random password with the given length"""
